@@ -1,0 +1,46 @@
+/*1.  Crie uma view para selecionar todos os dados do Nível, Cargo, Cliente e Região.*/
+create view ex1
+as
+select n.*, c.area, c.cod_area, c.quadro,
+	   c.bonus, c.contratacao, cl.*,
+	   cep.estado, cep.regiao
+from nivel n inner join cargo c
+	on n.cod_nivel = c.cod_nivel
+	inner join cliente cl
+	on c.cod_cargo = cl.cod_cargo_responsavel
+	inner join cep
+	on cl.cep = cep.cep
+
+select * 
+from ex1
+
+drop view ex1
+
+/*2. Elabora uma view que mostre a quantidade de clientes em cada Região*/
+create view ex2
+as
+select cep.regiao, count(*) as quantidade
+from cliente c inner join cep
+	 on c.cep = cep.cep
+group by cep.regiao
+
+select * 
+from ex2
+
+/*3. Elabore uma view que mostre a soma do salário base, benefícios, vt, vr e de impostos por nível.*/
+create view ex3
+as
+select n.descricao_nivel, sum(f.salario_base + f.beneficios + f.vt + f.vr + f.impostos) as total
+from funcionario f inner join cargo c
+	on f.cod_cargo = c.cod_cargo
+	inner join nivel n
+	on c.cod_nivel = n.cod_nivel
+group by n.descricao_nivel
+
+select *
+from ex3
+
+drop view ex3
+
+select *
+from funcionario

@@ -1,0 +1,31 @@
+--Exercicio 71. Crie uma função para retornar o número de vendedores cadastrados--
+create function ex71()
+returns int
+language sql
+as $$
+	select count(*)
+	from vendedor
+$$;
+
+select *
+from ex71()
+
+--Exercicio 72. Desenvolva uma função que informe a quantidade de --
+--pedidos em que um vendedor específico participou.--
+create function ex72(nome varchar)
+returns int
+language sql
+as $$
+	select count(*)
+	from pedido p inner join vendedor v
+	on p.codigo_vendedor = v.codigo_vendedor
+	where v.nome_vendedor = nome
+$$;
+
+select *
+from ex72('José')
+
+drop function ex72(nome varchar)
+
+select * 
+from vendedor

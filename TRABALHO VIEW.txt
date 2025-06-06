@@ -1,0 +1,166 @@
+/*1.  Crie uma view para selecionar todos os dados do Nível, Cargo, Cliente e Região.*/
+create view ex1
+as
+select n.*, c.area, c.cod_area, c.quadro,
+	   c.bonus, c.contratacao, cl.*,
+	   cep.estado, cep.regiao
+from nivel n inner join cargo c
+	on n.cod_nivel = c.cod_nivel
+	inner join cliente cl
+	on c.cod_cargo = cl.cod_cargo_responsavel
+	inner join cep
+	on cl.cep = cep.cep
+
+select * 
+from ex1
+
+/*2. Elabora uma view que mostre a quantidade de clientes em cada Região*/
+create view ex2
+as
+select cep.regiao, count(*) as quantidade
+from cliente c inner join cep
+	 on c.cep = cep.cep
+group by cep.regiao
+
+select * 
+from ex2
+
+/*3. Elabore uma view que mostre a soma do salário base, benefícios, vt, vr e de impostos por nível.*/
+create view ex3
+as
+select n.descricao_nivel, sum(f.salario_base + f.beneficios + f.vt + f.vr + f.impostos) as total
+from funcionario f inner join cargo c
+	on f.cod_cargo = c.cod_cargo
+	inner join nivel n
+	on c.cod_nivel = n.cod_nivel
+group by n.descricao_nivel
+
+select *
+from ex3
+
+/*4. Elabore uma view que mostre a quantidade de funconários para cada: ESTADO*/
+create view ex4a
+as 
+select cep.estado, count(*) as quantidade
+from funcionario f inner join cep
+	 on f.cep = cep.cep
+group by cep.estado
+
+select *
+from ex4a
+
+/*4. Elabore uma view que mostre a quantidade de funconários para cada: Contratação*/
+create view ex4b
+as 
+select c.contratacao, count(*) as quantidade
+from funcionario f inner join cargo c
+	 on f.cod_cargo = c.cod_cargo
+group by c.contratacao
+
+select *
+from ex4b
+
+/*5. Elabore uma view que mostre a quantidade de clientes para cada: REGIÃO */
+create view ex5a
+as
+select cep.regiao, count(*) as quantidade
+from cliente c inner join cep
+	 on c.cep = cep.cep
+group by cep.regiao
+
+select * 
+from ex5a
+
+/*5. Elabore uma view que mostre a quantidade de clientes para cada: ÁREA */
+create view ex5c
+as
+select n.descricao_nivel, count(*) as quantidade
+from cliente c inner join cargo ca
+	 on c.cod_cargo_responsavel = ca.cod_cargo
+	 inner join nivel n
+	 on ca.cod_nivel = n.cod_nivel
+group by n.descricao_nivel
+
+select * 
+from ex5c
+
+/*6. Elabore uma view que mostre o total do valor do contrato anual do cliente por descrição nível*/
+create view ex6
+as
+select n.descricao_nivel, sum(cl.valor_contrato_anual) as total
+from cliente cl inner join cargo ca 
+	on cl.cod_cargo_responsavel = ca.cod_cargo
+	inner join nivel n
+	on ca.cod_nivel = n.cod_nivel
+group by n.descricao_nivel
+
+select *
+from ex6
+
+drop view ex6
+
+/*7. Elabore uma view que mostre todos os dados dos niveis, cargos e 
+funcionarios e calcule soma do salário total = (salário base + benefícios + vt + vr + impostos).*/
+create view ex7
+as
+select n.*, c.area, c.bonus, c.contratacao, c.quadro, f.*, (f.salario_base + f.beneficios + f.vt + f.vr + f.impostos) as total
+from funcionario f inner join cargo c
+	on f.cod_cargo = c.cod_cargo
+	inner join nivel n
+	on c.cod_nivel = n.cod_nivel
+
+select *
+from ex7
+
+/*8. Faça uma view que mostre:
+- Soma do Salário Base
+- Soma do Salário Total = (salário base + benefícios + vt + vr + impostos)
+- Soma total dos dias trabalhados = soma (dias uteis trabalhados ano orçamentário)
+
+Para cada: CARGO*/
+create view ex8a
+as
+select c.cod_cargo, sum(f.salario_base)as salario_base, sum(f.salario_base + f.beneficios + f.vt + f.vr + f.impostos) as salario_total,
+	   sum(f.dias_uteis_trabalhados_ano_orcamentario) as total_dias 
+from funcionario f inner join cargo c
+	 on f.cod_cargo = c.cod_cargo
+group by c.cod_cargo
+
+select *
+from ex8a
+
+/*8. Faça uma view que mostre:
+- Soma do Salário Base
+- Soma do Salário Total = (salário base + benefícios + vt + vr + impostos)
+- Soma total dos dias trabalhados = soma (dias uteis trabalhados ano orçamentário)
+
+Para cada: REGIAO*/
+create view ex8b
+as
+select cep.regiao, sum(f.salario_base)as salario_base, sum(f.salario_base + f.beneficios + f.vt + f.vr + f.impostos) as salario_total,
+	   sum(f.dias_uteis_trabalhados_ano_orcamentario) as total_dias 
+from funcionario f inner join cep
+	 on f.cep = cep.cep
+group by cep.regiao
+
+select *
+from ex8b
+
+/*8. Faça uma view que mostre:
+- Soma do Salário Base
+- Soma do Salário Total = (salário base + benefícios + vt + vr + impostos)
+- Soma total dos dias trabalhados = soma (dias uteis trabalhados ano orçamentário)
+
+Para cada: DESCRICAO NIVEL*/
+create view ex8c
+as
+select n.descricao_nivel, sum(f.salario_base)as salario_base, sum(f.salario_base + f.beneficios + f.vt + f.vr + f.impostos) as salario_total,
+	   sum(f.dias_uteis_trabalhados_ano_orcamentario) as total_dias 
+from funcionario f inner join cargo c
+	 on f.cod_cargo = c.cod_cargo
+	 inner join nivel n
+	 on c.cod_nivel = n.cod_nivel
+group by n.descricao_nivel
+
+select *
+from ex8c

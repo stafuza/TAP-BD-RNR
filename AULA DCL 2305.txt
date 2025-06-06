@@ -1,0 +1,41 @@
+--DCL (DATA CONTROL LANGUAGE)--
+
+create role adm
+
+select * from pg_user
+
+select * from pg_group
+
+alter role adm login
+
+alter role adm with encrypted password '123' superuser 
+	createdb inherit 
+	valid until '2025-05-30'
+	connection limit 3
+	createrole
+
+create role user1
+
+alter role user1 login encrypted password'123'
+
+create role user2 login encrypted password'123'
+
+create role user3 login encrypted password'123'
+
+create role funcionario
+
+grant funcionario to user1, user2, user3
+
+revoke funcionario from user1
+
+drop role funcionario
+
+drop role user1, user2, user3
+
+alter role adm nosuperuser
+	nocreatedb
+	noinherit
+
+drop role adm 
+
+

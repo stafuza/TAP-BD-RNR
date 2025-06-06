@@ -1,0 +1,116 @@
+/*Exercicio 73. Elabore uma função que liste os vendedores (codigo, nome, salario) que atenderam um cliente,
+recebendo o nome do cliente como parâmetro.*/
+create function ex73(nome varchar)
+returns table(codigo int, nomev varchar, salario numeric)
+language sql
+as $$
+	select v.codigo_vendedor, v.nome_vendedor, v.salario_fixo
+	from cliente c inner join pedido p
+	on c.codigo_cliente = p.codigo_cliente
+	inner join vendedor v
+	on p.codigo_vendedor = v.codigo_vendedor
+	where upper(c.nome_cliente) =  upper(nome);
+$$;
+
+drop function ex73
+
+select distinct * 
+from ex73('ana')
+
+/*74.  Crie uma função que retorne os códigos, descrição e unidades de todos os produtos cadastrados.
+Ao selecionar a função ordene pela descrição do produto.*/
+create function ex74()
+returns table(codigo int, descricao varchar, unidade varchar)
+language sql
+as $$
+    select codigo_produto, descricao_produto, unidade
+    from produto
+    order by descricao_produto
+$$;
+
+select * 
+from ex74();
+
+/*75.   Desenvolva uma função que apresente o maior, o menor e a média dos salários dos vendedores 
+que atenderam um cliente específico, utilizando como parâmetros o nome do cliente e uma faixa de comissão. 
+Como exemplo de parâmetro pode ser usado Susana, C.*/
+create function ex75(nome varchar, faixa_comissao varchar)
+returns table(maior_salario numeric, menor_salario numeric, media_salario numeric)
+language sql
+as $$
+    select max(salario_fixo), min(salario_fixo), avg(salario_fixo)
+    from vendedor v inner join pedido p 
+	on v.codigo_vendedor = p.codigo_vendedor
+    inner join cliente c 
+	on p.codigo_cliente = c.codigo_cliente
+    where upper(c.nome_cliente) = upper(c.nome_cliente) and upper(v.faixa_comissao) = upper(v.faixa_comissao)
+$$;
+
+select * 
+from ex75('ana', 'A');
+
+/*76.   Desenvolva uma função que mostre código e descrição do produto, a quantidade de produtos vendidos, 
+o Preço Unitário e o subtotal (quantidade*Preço Unitário) de um determinado Pedido.*/
+create function ex76(num_pedido int)
+returns table(codigo int, descricao varchar, quantidade int, valor numeric, subtotal numeric)
+language sql
+as $$
+    select ip.codigo_produto, p.descricao_produto, ip.quantidade, p.val_unit, 
+	(ip.quantidade * p.val_unit) as subtotal
+    from item_do_pedido ip inner join produto p 
+	on ip.codigo_produto = p.codigo_produto
+    where ip.num_pedido = num_pedido
+$$;
+
+select * 
+from ex76(101);
+
+/*77.   Desenvolva um procedimento que retorne a soma de uma venda de um determinado pedido.*/
+create function ex77(num_pedido int)
+returns numeric
+language sql
+as $$
+    select sum(ip.quantidade * p.val_unit) as total_venda
+    from item_do_pedido ip
+    inner join produto p on ip.codigo_produto = p.codigo_produto
+    where ip.num_pedido = num_pedido
+$$;
+
+drop procedure ex77(num_pedido int)
+
+select *
+from ex77(97);
+
+/*78.   Elabore um procedimento que informe, para cada vendedor, a quantidade de pedidos em que ele 
+participou.*/
+create function ex78()
+returns table(codigo_vendedor int, total_pedidos int)
+language sql
+as $$
+    select v.codigo_vendedor, count(p.num_pedido) as total_pedidos
+    from vendedor v left join pedido p 
+	on v.codigo_vendedor = p.codigo_vendedor
+    group by v.codigo_vendedor
+    order by v.codigo_vendedor
+$$;
+
+select *
+from ex78();
+
+/*79.   Crie um procedimento que retorne o código e o nome dos clientes, filtrando os 
+resultados com base no código do vendedor, no estado de residência do cliente e no prazo de entrega do pedido. Utilize como exemplo os seguintes parâmetros: 101 (código do vendedor), 'RJ' (estado) e 20 (prazo de entrega).*/
+create function ex79a(cod_vendedor int, estado varchar, prazo int)
+returns table(codigo_cliente int, nome_cliente text)
+language sql
+as $$
+    select c.codigo_cliente, c.nome_cliente
+    from cliente c inner join pedido p 
+	on c.codigo_cliente = p.codigo_cliente
+    where p.codigo_vendedor = codigo_vendedor and c.uf = estado and p.prazo_entrega <= prazo
+    order by c.codigo_cliente
+$$;
+
+drop function ex79(cod_vendedor int, estado varchar, prazo int)
+
+select *
+from ex79a(101, 'RJ', 20);

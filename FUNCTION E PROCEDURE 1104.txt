@@ -1,0 +1,75 @@
+select *
+from pg_language
+
+
+create function sp_ola()
+returns text 
+language sql
+as $$
+	select 'Olá, Pessoal!';
+$$
+
+select sp_ola();
+
+drop function sp_ola();
+
+
+create procedure teste()
+language plpgsql
+as $$
+begin
+	raise notice 'Olá, pissual!';
+end;
+$$
+
+call teste();
+
+
+create function total_clientes()
+returns bigint
+language sql
+as $$
+	select count(*)
+	from cliente;
+$$;
+
+select total_clientes();
+
+
+create function listar_cliente()
+returns table(codigo INT, nome VARCHAR)
+language sql
+as $$
+	select codigo_cliente, nome_cliente
+	from cliente;
+$$;
+
+select *
+from listar_cliente
+
+create function clientes_estado(est varchar)
+returns table(codigo integer, nome varchar, estado varchar)
+language sql
+as $$
+	select codigo_cliente, nome_cliente, uf
+	from cliente
+	where uf = est;
+$$;
+
+select *
+from clientes_estado('RJ');
+
+---------------------------------------------------------------
+create function exercicio(faixa varchar)
+returns table(codigo int, nome varchar, salario numeric, faixa varchar)
+language sql
+as $$
+	select *
+	from vendedor
+	where faixa_comissao = faixa;
+$$;
+
+select *
+from exercicio('C')
+
+drop function exercicio(faixa varchar)

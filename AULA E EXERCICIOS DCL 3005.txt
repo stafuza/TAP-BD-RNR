@@ -1,0 +1,98 @@
+create role lucas encrypted password '123' login;
+
+create role bruno encrypted password '123' login;
+
+create role helena encrypted password '123' login;
+
+select * from pg_user
+
+alter role bruno createdb superuser 
+
+alter role bruno nosuperuser
+
+revoke all on cliente, pedido, item_do_pedido, 
+			  produto, vendedor from public
+
+grant select, insert on cliente to bruno
+
+--1. Crie um papel chamado vendedor com senha criptografada.--
+create role vendedor encrypted password '123'
+
+
+--2. Altere o papel vendedor, concedendo permissão de superusuário e login.--
+alter role vendedor superuser login
+
+--3. Remova a permissão de superusuário e a herança de privilégios do papel vendedor.--
+alter role vendedor nosuperuser noinherit
+
+--4. Remova o papel vendedor.--
+drop role vendedor
+
+/*5. Crie o papel limitado com as seguintes restrições: 
+- Senha criptografada 
+- Sem superusuário 
+- Sem permissão para criar banco de dados nem papéis 
+- Sem herança de privilégios 
+- Permissão de login 
+- Até 4 conexões simultâneas 
+- Validade até 30/06/2025*/
+create role limitado encrypted password '123' login nosuperuser nocreatedb noinherit
+	connection limit 4 valid until '2025-06-30'
+
+/*6. Crie os papéis vendedor, secretaria e atendente, com: 
+- Senha criptografada 
+- Sem herança de privilégios 
+- Permissão de login*/
+create role vendedor encrypted password '123' login noinherit;
+
+create role secretaria encrypted password '123' login noinherit;
+
+create role atendente encrypted password '123' login noinherit;
+
+--7. Liste todos os papéis existentes.--
+select * from pg_user
+
+--8. Crie um papel chamado funcionario que servirá como grupo.--
+create role funcionario 
+
+--9. Adicione os papéis vendedor, secretaria, atendente e limitado ao grupo funcionario.--
+grant funcionario to vendedor, secretaria, atendente, limitado
+
+--10. Remova o papel limitado do grupo funcionario.--
+revoke funcionario from limitado
+
+--11. Liste todos os grupos (papéis sem login).--
+select * from pg_group
+
+/*12. No banco vendas, remova todas as permissões das tabelas cliente, pedido, vendedor, 
+item do pedido e produto.*/
+revoke all on cliente, pedido, vendedor, item_do_pedido, produto from public
+
+/*13. Conceda os privilégios de seleção, inserção e alteração nas tabelas cliente e 
+vendedor para o papel secretária.*/
+grant select, insert, update on cliente, vendedor to secretaria
+
+/*14. Faça login com o papel secretaria e:
+Selecione os dados das tabelas cliente, vendedor, produto*/
+select * from cliente --permitida
+
+select * from vendedor --permitida
+
+select * from produto --negada
+
+--Insira e remova um registro em cliente--
+insert into cliente (codigo_cliente, nome_cliente) values (1, 'Enzo') --permitida
+
+delete from cliente where codigo_cliente = 1 --negada
+
+/*15. Acesse novamente com o usuário postgres e revogue do papel secretaria os privilégios de SELECT, 
+INSERT e UPDATE na tabela vendedor.*/
+revoke select, insert, update on vendedor from secretaria
+
+/*16. Faça login novamente como secretaria e tente acessar:
+SELECT em cliente e vendedor*/
+select * from cliente --permitida
+select * from vendedor --negada
+
+
+	
